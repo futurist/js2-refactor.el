@@ -269,8 +269,9 @@ Pass COMMENTS-LIST when no AST available."
             (pos-list (list
                         (list :pos target-start :node target :parent target :no-buond no-bound)
                         (list :pos (1- target-end) :node target :parent target :no-buond no-bound)))
-            (sum-space 0)
+            (newline (js2r--buffer-newline-char))
             child-nodes
+            changes content
             pos-start pos-end
             asi node parent start end)
       ;; build pos-list for list node
@@ -317,22 +318,12 @@ Pass COMMENTS-LIST when no AST available."
           (unless (or (plist-get start :no-buond)
                       (plist-get end :no-buond)
                       (js2r--comments-between pos-start pos-end))
-            ;; remove start part space
-            (goto-char (- pos-start sum-space))
-            (while (looking-at "[\n\s]")
-              (delete-char 1)
-              (cl-incf sum-space))
-            ;; remove end part space
-            (goto-char (- pos-end sum-space))
-            (while (looking-back "[\n\s]")
-              (delete-char -1)
-              (cl-incf sum-space))
+            (setq content (s-trim (buffer-substring pos-start pos-end)))
             ;; add ";" for ASI if it omitted
-            (when (and is-contract asi (not (js2-block-node-p node)) (not (= (char-before) ?\;)))
-              (insert ";")
-              (cl-decf sum-space))
+            (when (and is-contract asi (not (js2-block-node-p node)) (not (= (char-before pos-start) ?\;)))
+              (setq content (concat content ";")))
             (if is-contract
-                (insert " ")
+                (setq content (concat content " "))
               (if (and
                    ;; don't append newline for object prop name
                    (js2-object-node-p parent)
@@ -340,13 +331,11 @@ Pass COMMENTS-LIST when no AST available."
                    (not (eq node parent))
                    (not (eq (plist-get end :node) parent))
                    ;; check object-prop-left-node-p (workaround)
-                   (= (js2-node-abs-pos node) (js2-node-abs-pos (js2-node-parent node))))
-                  (insert " ")
-                (newline)))
-            (cl-decf sum-space)
-            ))
-        (when (not is-contract)
-          (js2-indent-region target-start (- target-end sum-space)))
+                   (zerop (js2-node-pos node)))
+                  (setq content (concat content " "))
+                (setq content (concat content newline))))
+            (push (list :beg pos-start :end pos-end :contents content) changes)))
+        (js2r--execute-changes changes)
         (js2-reparse)))))
 
 (defun js2r-expand-node-at-point (args)

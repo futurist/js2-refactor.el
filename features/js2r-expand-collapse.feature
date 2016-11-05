@@ -217,31 +217,31 @@ Feature: Expand and collapse things
     Then I should see:
     """
     m( 'table.overlay', {style:{border:0, padding:0, margin:0, width:'100px', height:'100px', backgroundColor:'rgba(0,0,0,0.5)'}}, m(
-            'tr',
+        'tr',
+        m(
+            'td',
+            {align:'center'},
             m(
-                'td',
-                {align:'center'},
-                m(
-                    'div',
-                    {style:{width:'200px'}},
-                    'some text'
-                )
+                'div',
+                {style:{width:'200px'}},
+                'some text'
             )
-        ) );
+        )
+    ) );
     """
     And I go to the front of the word "tr"
     And I press "C-c C-m cc"
     Then I should see:
     """
     m( 'table.overlay', {style:{border:0, padding:0, margin:0, width:'100px', height:'100px', backgroundColor:'rgba(0,0,0,0.5)'}}, m( 'tr', m(
-                'td',
-                {align:'center'},
-                m(
-                    'div',
-                    {style:{width:'200px'}},
-                    'some text'
-                )
-            ) ) );
+        'td',
+        {align:'center'},
+        m(
+            'div',
+            {style:{width:'200px'}},
+            'some text'
+        )
+    ) ) );
     """
 
   Scenario: Expanding arrays
@@ -298,7 +298,7 @@ Feature: Expand and collapse things
     When I insert:
     """
     var a = [1, 2, 3];
-    var b = {c:4, d:5};
+    var b = {c:4, 'd':5};
     function abc(x,y){x+=z; return x+y;}
     func(6,7);
     """
@@ -312,7 +312,7 @@ Feature: Expand and collapse things
         2,
         3
     ];
-    var b = {c:4, d:5};
+    var b = {c:4, 'd':5};
     function abc(x,y){x+=z; return x+y;}
     func(6,7);
     """
@@ -320,7 +320,7 @@ Feature: Expand and collapse things
     Then I should see:
     """
     var a = [ 1, 2, 3 ];
-    var b = {c:4, d:5};
+    var b = {c:4, 'd':5};
     function abc(x,y){x+=z; return x+y;}
     func(6,7);
     """
@@ -331,7 +331,7 @@ Feature: Expand and collapse things
     var a = [ 1, 2, 3 ];
     var b = {
         c: 4,
-        d: 5
+        'd': 5
     };
     function abc(x,y){x+=z; return x+y;}
     func(6,7);
@@ -340,7 +340,7 @@ Feature: Expand and collapse things
     Then I should see:
     """
     var a = [ 1, 2, 3 ];
-    var b = { c: 4, d: 5 };
+    var b = { c: 4, 'd': 5 };
     function abc(x,y){x+=z; return x+y;}
     func(6,7);
     """
@@ -349,7 +349,7 @@ Feature: Expand and collapse things
     Then I should see:
     """
     var a = [ 1, 2, 3 ];
-    var b = { c: 4, d: 5 };
+    var b = { c: 4, 'd': 5 };
     function abc(x,y){
         x+=z;
         return x+y;
@@ -360,7 +360,7 @@ Feature: Expand and collapse things
     Then I should see:
     """
     var a = [ 1, 2, 3 ];
-    var b = { c: 4, d: 5 };
+    var b = { c: 4, 'd': 5 };
     function abc(x,y){ x+=z; return x+y; }
     func(6,7);
     """
@@ -369,7 +369,7 @@ Feature: Expand and collapse things
     Then I should see:
     """
     var a = [ 1, 2, 3 ];
-    var b = { c: 4, d: 5 };
+    var b = { c: 4, 'd': 5 };
     function abc(x,y){ x+=z; return x+y; }
     func(
         6,
@@ -380,7 +380,7 @@ Feature: Expand and collapse things
     Then I should see:
     """
     var a = [ 1, 2, 3 ];
-    var b = { c: 4, d: 5 };
+    var b = { c: 4, 'd': 5 };
     function abc(x,y){ x+=z; return x+y; }
     func( 6, 7 );
     """
@@ -388,7 +388,11 @@ Feature: Expand and collapse things
   Scenario: Expanding and contracting node at point recursively
     When I insert:
     """
-    var a = [[1,2,3],{c:4,'d':5}
+    var a = [[1,2,3],{c
+    :
+    4
+    ,
+    'd':5}
     ,function abc(x,y){x+=z; return x+y},abc(6,7),new abc(8, 9) ]
     """
     And I turn on js2-mode and js2-refactor-mode
@@ -419,4 +423,9 @@ Feature: Expand and collapse things
             9
         )
     ]
+    """
+    And I press "C-u C-c C-m cc"
+    Then I should see:
+    """
+    var a = [ [ 1, 2, 3 ], { c: 4, 'd': 5 }, function abc(x,y){ x+=z; return x+y; }, abc( 6, 7 ), new abc( 8, 9 ) ]
     """
