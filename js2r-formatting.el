@@ -269,7 +269,7 @@ Pass COMMENTS-LIST when no AST available."
             (pos-list (list
                         (list :pos target-start :node target :parent target :no-buond no-bound)
                         (list :pos (1- target-end) :node target :parent target :no-buond no-bound)))
-            (newline (js2r--buffer-newline-char))
+            (newline "\n")
             child-nodes
             changes content
             pos-start pos-end
